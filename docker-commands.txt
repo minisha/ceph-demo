@@ -1,0 +1,66 @@
+sudo docker run -d --net=host \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-e MON_IP=172.17.0.1 \
+-e CEPH_PUBLIC_NETWORK=172.17.0.0/256 \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 mon
+
+
+sudo docker run -d --net=host \
+--pid=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/sdb \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 osd
+
+sudo docker run -d --net=host \
+--pid=host \
+--privileged=true \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /dev/:/dev/ \
+-e OSD_DEVICE=/dev/sdc \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 osd
+
+
+sudo docker run -d --net=host \
+-v /etc/ceph:/etc/ceph \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 mgr
+
+
+sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /etc/ceph:/etc/ceph \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 rgw
+
+
+sudo docker run -d --net=host \
+-v /var/lib/ceph/:/var/lib/ceph/ \
+-v /etc/ceph:/etc/ceph \
+-e CEPHFS_CREATE=1 \
+ceph/daemon:v3.0.5-stable-3.0-luminous-centos-7 mds
+
+
+
+
+ceph restful create-self-signed-cert
+ceph mgr module enable dashboard 
+ceph auth get client.admin
+
+
+ceph osd pool create mpool 125 
+ceph osd dump| grep size
+ceph osd pool set mpool size 1
+ceph osd pool set .rgw.root size 1
+ceph osd pool set default.rgw.control size 1
+ceph osd pool set default.rgw.meta  size 1
+ceph osd pool set default.rgw.log size 1
+
+
+auth get-or-create client.admin mds 'allow' osd 'allow *' mon 'allow *' > /etc/ceph/ceph.client.admin.keyring
+
+
+ radosgw-admin user create --uid={name} --display-name="name" --email=dd@gmail.com
